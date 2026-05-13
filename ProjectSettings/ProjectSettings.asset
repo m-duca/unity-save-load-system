@@ -923,11 +923,11 @@ PlayerSettings:
   activeInputHandler: 1
   windowsGamepadBackendHint: 0
   enableDirectStorage: 0
-  cloudProjectId: 
+  cloudProjectId: e59c786d-a5e0-4299-a44c-56989eb5f040
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
-  organizationId: 
+  projectName: unity-save-load-system 2026-05-13_15-03-58
+  organizationId: sktheu
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
