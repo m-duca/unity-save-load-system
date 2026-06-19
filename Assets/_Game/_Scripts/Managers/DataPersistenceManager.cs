@@ -20,6 +20,8 @@ public class DataPersistenceManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void Start() => LoadGame();
+
     public void NewGame()
     {
         _gameData = new GameData();
@@ -45,4 +47,6 @@ public class DataPersistenceManager : MonoBehaviour
         
         // TODO: save the data into a file
     }
+
+    private void OnApplicationQuit() => SaveGame();
 }
