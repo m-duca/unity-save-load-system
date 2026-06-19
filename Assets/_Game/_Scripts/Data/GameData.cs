@@ -7,6 +7,6 @@ public class GameData
 
     public GameData()
     {
-        this.Example = 0;
+        this.Example = 1;
     }
 }

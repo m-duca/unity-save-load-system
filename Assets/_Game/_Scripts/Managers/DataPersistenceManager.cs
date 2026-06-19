@@ -1,16 +1,20 @@
 using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
+using System;
 
 public class DataPersistenceManager : MonoBehaviour
 {
     // Singleton
-    public static DataPersistenceManager Instance {get; private set;}
+    public static DataPersistenceManager Instance { get; private set; }
 
     // Not serialized
     private GameData _gameData;
+    private List<IDataPersistence> _dataPersistenceObjects;
 
     private void Awake()
     {
-        if (Instance == null && Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -20,12 +24,20 @@ public class DataPersistenceManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Start() => LoadGame();
-
-    public void NewGame()
+    private void Start()
     {
-        _gameData = new GameData();
+        _dataPersistenceObjects = FindAllDataPersistenceObjects();
+        LoadGame();
     }
+
+    private List<IDataPersistence> FindAllDataPersistenceObjects()
+    {
+        IEnumerable<IDataPersistence> dataPersistenceObjects = FindObjectsByType<MonoBehaviour>().OfType<IDataPersistence>();
+
+        return new List<IDataPersistence>(dataPersistenceObjects);
+    }
+
+    public void NewGame() => _gameData = new GameData();
 
     public void LoadGame()
     {
@@ -38,13 +50,15 @@ public class DataPersistenceManager : MonoBehaviour
             NewGame();
         }
 
-        // TODO: send the data to all scripts that need it
+        foreach (IDataPersistence persistenceObject in _dataPersistenceObjects)
+            persistenceObject.LoadData(_gameData);
     }
 
     public void SaveGame()
     {
-        // TODO: pass the data to other scripts so they can update it
-        
+        foreach (IDataPersistence persistenceObject in _dataPersistenceObjects)
+            persistenceObject.SaveData(_gameData);
+
         // TODO: save the data into a file
     }
 
