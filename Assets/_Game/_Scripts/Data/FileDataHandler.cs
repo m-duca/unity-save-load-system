@@ -15,22 +15,50 @@ public class FileDataHandler
 
     public GameData Load()
     {
-        
+        string fullPath = GetFullPath();
+
+        GameData loadedData = null;
+
+        if (File.Exists(fullPath))
+        {
+            try
+            {
+                // Loading the serialized data from the file
+                string dataToLoad = "";
+
+                using (FileStream stream = new FileStream(fullPath, FileMode.Open))
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        dataToLoad = reader.ReadToEnd();
+                    }
+                }
+
+                // Deserializing the data from JSON back to C# object
+                loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
+            }
+            catch (Exception error)
+            {
+                Debug.LogError("Error while trying to load data from the file: " + fullPath + "\n" + error);
+            }
+        }
+
+        return loadedData;
     }
 
     public void Save(GameData gameData)
     {
-        string fullPath = Path.Combine(_dataDirPath, _dataFileName);
+        string fullPath = GetFullPath();
 
         try
         {
-            // creating the directory if it doesn't already exist
+            // Creating the directory if it doesn't already exist
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-            // serializing the C# game data object into json format
+            // Serializing the C# game data object into JSON format
             string dataToStore = JsonUtility.ToJson(gameData, true);
 
-            // writing down the serialized values into the json
+            // Writing down the serialized values into the JSON
             using (FileStream stream = new FileStream(fullPath, FileMode.Create))
             {
                 using (StreamWriter writer = new StreamWriter(stream))
@@ -39,9 +67,15 @@ public class FileDataHandler
                 }
             }
         }
-        catch (Exception e)
+        catch (Exception error)
         {
-            Debug.LogError("Error while trying to save data into the file: " + fullPath + "\n" + e);            
+            Debug.LogError("Error while trying to save data into the file: " + fullPath + "\n" + error);
         }
+    }
+
+    private string GetFullPath()
+    {
+        // Using Path.Combine to account different OS
+        return Path.Combine(_dataDirPath, _dataFileName);
     }
 }
