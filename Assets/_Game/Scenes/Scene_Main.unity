@@ -302,6 +302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataPersistenceManager
   _fileName: game_data
+  _useEncryption: 1
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

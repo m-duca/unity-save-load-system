@@ -37,8 +37,6 @@ public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IS
         }
 
         for (int i = 0; i < _keys.Count; i++)
-        {
             this.Add(_keys[i], _values[i]);   
-        }
     }
 }
