@@ -8,9 +8,14 @@ public class DataPersistenceManager : MonoBehaviour
     // Singleton
     public static DataPersistenceManager Instance { get; private set; }
 
+    // Inspector
+    [Header("Settings")]
+    [SerializeField] private string _fileName;
+
     // Not serialized
     private GameData _gameData;
     private List<IDataPersistence> _dataPersistenceObjects;
+    private FileDataHandler _fileDataHandler;
 
     private void Awake()
     {
@@ -26,6 +31,8 @@ public class DataPersistenceManager : MonoBehaviour
 
     private void Start()
     {
+        // persistentDataPath == OS standard directory for saving persistence data
+        _fileDataHandler = new FileDataHandler(Application.persistentDataPath, _fileName);
         _dataPersistenceObjects = FindAllDataPersistenceObjects();
         LoadGame();
     }
@@ -41,7 +48,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadGame()
     {
-        // TODO: a Load data from a file into the current gameData instance
+        _gameData = _fileDataHandler.Load();
 
         // if no data was found, we need to create a new game data
         if (_gameData == null)
@@ -59,7 +66,7 @@ public class DataPersistenceManager : MonoBehaviour
         foreach (IDataPersistence persistenceObject in _dataPersistenceObjects)
             persistenceObject.SaveData(_gameData);
 
-        // TODO: save the data into a file
+        _fileDataHandler.Save(_gameData);
     }
 
     private void OnApplicationQuit() => SaveGame();
