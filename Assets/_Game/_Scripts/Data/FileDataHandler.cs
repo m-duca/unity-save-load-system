@@ -10,7 +10,7 @@ public class FileDataHandler
     public FileDataHandler(string dataDirPath, string dataFileName)
     {
         this._dataDirPath = dataDirPath;
-        this._dataFileName = dataFileName;
+        this._dataFileName = dataFileName + ".json";
     }
 
     public GameData Load()
