@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using System;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -11,6 +10,7 @@ public class DataPersistenceManager : MonoBehaviour
     // Inspector
     [Header("Settings")]
     [SerializeField] private string _fileName;
+    [SerializeField] private bool _useEncryption;
 
     // Not serialized
     private GameData _gameData;
@@ -32,7 +32,7 @@ public class DataPersistenceManager : MonoBehaviour
     private void Start()
     {
         // persistentDataPath == OS standard directory for saving persistence data
-        _fileDataHandler = new FileDataHandler(Application.persistentDataPath, _fileName);
+        _fileDataHandler = new FileDataHandler(Application.persistentDataPath, _fileName, _useEncryption);
         _dataPersistenceObjects = FindAllDataPersistenceObjects();
         LoadGame();
     }
