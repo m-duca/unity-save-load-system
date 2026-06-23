@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class DataPersistenceManager : MonoBehaviour
 {
@@ -11,6 +12,9 @@ public class DataPersistenceManager : MonoBehaviour
     [Header("Settings")]
     [SerializeField] private string _fileName;
     [SerializeField] private bool _useEncryption;
+
+    [Header("Debug")]
+    [SerializeField] private bool _createDataIfNull;
 
     // Not serialized
     private GameData _gameData;
@@ -27,12 +31,36 @@ public class DataPersistenceManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        // persistentDataPath == OS standard directory for saving persistence data
+        _fileDataHandler = new FileDataHandler(Application.persistentDataPath, _fileName, _useEncryption);
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneUnloaded -= OnSceneUnloaded;
+    }
+
+    public void OnSceneLoaded (Scene scene, LoadSceneMode mode)
+    {
+        _dataPersistenceObjects = FindAllDataPersistenceObjects();
+        LoadGame();
+    }
+
+    public void OnSceneUnloaded (Scene scene)
+    {
+        SaveGame();
     }
 
     private void Start()
     {
-        // persistentDataPath == OS standard directory for saving persistence data
-        _fileDataHandler = new FileDataHandler(Application.persistentDataPath, _fileName, _useEncryption);
         _dataPersistenceObjects = FindAllDataPersistenceObjects();
         LoadGame();
     }
@@ -51,7 +79,7 @@ public class DataPersistenceManager : MonoBehaviour
         _gameData = _fileDataHandler.Load();
 
         // if no data was found, we need to create a new game data
-        if (_gameData == null)
+        if (_gameData == null && _createDataIfNull)
         {
             Debug.LogError("No saved Data was found. Initializing with default values...");
             NewGame();
