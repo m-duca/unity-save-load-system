@@ -15,6 +15,7 @@ public class DataPersistenceManager : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool _createDataIfNull;
+    [SerializeField] private bool _forceNewGame;
 
     // Not serialized
     private GameData _gameData;
@@ -48,13 +49,13 @@ public class DataPersistenceManager : MonoBehaviour
         SceneManager.sceneUnloaded -= OnSceneUnloaded;
     }
 
-    public void OnSceneLoaded (Scene scene, LoadSceneMode mode)
+    public void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         _dataPersistenceObjects = FindAllDataPersistenceObjects();
         LoadGame();
     }
 
-    public void OnSceneUnloaded (Scene scene)
+    public void OnSceneUnloaded(Scene scene)
     {
         SaveGame();
     }
@@ -76,13 +77,21 @@ public class DataPersistenceManager : MonoBehaviour
 
     public void LoadGame()
     {
-        _gameData = _fileDataHandler.Load();
-
-        // if no data was found, we need to create a new game data
-        if (_gameData == null && _createDataIfNull)
+        if (_forceNewGame) // Forcing new Game, if enabled
         {
-            Debug.LogError("No saved Data was found. Initializing with default values...");
             NewGame();
+            Debug.Log("<color=yellow>ForceNewGame enabled. Initializing with default values...</color>");
+        }
+        else // Load default
+        {
+            _gameData = _fileDataHandler.Load();
+
+            // if no data was found, we need to create a new game data
+            if (_gameData == null && _createDataIfNull)
+            {
+                Debug.Log("<color=yellow>No saved Data was found. Initializing with default values...</color>");
+                NewGame();
+            }
         }
 
         foreach (IDataPersistence persistenceObject in _dataPersistenceObjects)
