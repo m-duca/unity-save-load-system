@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class FileDataHandler
@@ -15,43 +14,6 @@ public class FileDataHandler
         this._dataDirPath = dataDirPath;
         this._dataFileName = dataFileName + ".json";
         this._useEncryption = useEncryption;
-    }
-
-    public GameData Load()
-    {
-        string fullPath = GetFullPath();
-
-        GameData loadedData = null;
-
-        if (File.Exists(fullPath))
-        {
-            try
-            {
-                // Loading the serialized data from the file
-                string dataToLoad = "";
-
-                using (FileStream stream = new FileStream(fullPath, FileMode.Open))
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        dataToLoad = reader.ReadToEnd();
-                    }
-                }
-
-                // Deserializing the data from JSON back to C# object
-                loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
-
-                // if has been encrypted we need decrypt
-                if (_useEncryption)
-                    dataToLoad = EncryptOrDecrypt(dataToLoad);
-            }
-            catch (Exception error)
-            {
-                Debug.LogError("Error while trying to load data from the file: " + fullPath + "\n" + error);
-            }
-        }
-
-        return loadedData;
     }
 
     public void Save(GameData gameData)
@@ -82,6 +44,50 @@ public class FileDataHandler
         catch (Exception error)
         {
             Debug.LogError("Error while trying to save data into the file: " + fullPath + "\n" + error);
+        }
+    }
+
+    public GameData Load()
+    {
+        string fullPath = GetFullPath();
+
+        if (!File.Exists(fullPath))
+            return null;
+
+        // try JSON without decrypt first
+        try
+        {
+            string dataToLoad = File.ReadAllText(fullPath);
+
+            GameData data = JsonUtility.FromJson<GameData>(dataToLoad);
+
+            if (data != null)
+            {
+                Debug.Log("<color=green>Save loaded successfully without decrypt!</color>");
+                return data;
+            }
+        }
+        catch (Exception error)
+        {
+            Debug.Log("<color=yellow>Fail loading JSON. Trying to decrypt...</color>" + "\n" + error);
+        }
+
+        // Try decrypt if pure JSON was failed
+        try
+        {
+            string encryptedData = File.ReadAllText(fullPath);
+
+            string decryptedData = EncryptOrDecrypt(encryptedData);
+
+            GameData data = JsonUtility.FromJson<GameData>(decryptedData);
+
+            Debug.Log("<color=green>Save loaded successfully after decrypt!</color>");
+            return data;
+        }
+        catch (Exception error)
+        {
+            Debug.LogError("Failed to load gameData" + "\n" + error);
+            return null;
         }
     }
 
